@@ -1,0 +1,107 @@
+openapi: "3.0.3"
+
+info:
+  title: "CodeConvertX"
+  version: "1.0"
+
+paths: 
+  "/health":
+    get:
+      summary: "check health"
+      description: "通信可能かどうか返事をする"
+      responses: 
+        "200":
+          description: "通信OK!"
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/execInfo"
+        "4XX":
+          $ref: "#components/responses/clientError"
+        "5XX":
+          $ref: "#components/responses/serverError"
+  "/code_conversion":
+    post:
+      summary: "code convert"
+      description: "src文字コードの文字列をdst文字列に変換して返します"
+      requestBody:
+        $ref: "#components/requestBodies/convertTarget"    
+      responses:
+        "200":
+          $ref: "#components/responses/convertedData"
+        "4XX":
+          $ref: "#components/responses/clientError"
+        "5XX":
+          $ref: "#components/responses/serverError"
+
+
+components:
+  schemas:
+    convertTargetParam:
+      type: "object"
+      properties:        
+        srcStr:
+          type: "string"
+          example: "abcde"
+        baseCharacterCode:
+          type: "string"
+          example: "utf8"
+        convertedCharacterCode:
+          type: "string"
+          example: "sjis"
+#        accessKey:
+#          type: "string"
+#          example: "XXX-XXXX-XXXX"
+    convertedReturnParam:
+      type: "object"
+      properties:
+        errors:
+          $ref: "#components/schemas/errors"
+        destStr:
+          type: "string"
+          example: "abcde"
+        logs:
+          type: "string"
+          example: "converted success. abcde[utf8] -> abcde[sjis]"
+    errors:
+      type: "object"
+      properties:
+        errorCode:
+          type: "integer"
+          example: 0
+        errorMessage:
+          type: "string"
+          example: ""
+  requestBodies:
+    convertTarget:
+      description: "変換対象のデータを受け取る"
+      content:
+        application/json:
+          schema:
+            $ref: "#components/schemas/convertTargetParam"
+      required: true
+  responses:
+    convertedData:
+      description: "変換したデータの返却"
+#      ヘッダーに何を設定するのかは要検討。必須項目ではないため今回はパス
+#      headers:  
+      content:
+        application/json:
+          schema:
+            $ref: "#components/schemas/convertedReturnParam"
+#      何を設定するか不明。openapi内の他の記述のリンク？一旦パス
+#      links:
+    clientError:
+      description: "クライアント側の問題で発生する一般エラー"
+      content:
+        application/json:
+          schema:
+            $ref: "#components/schemas/errors"
+    serverError:
+      description: "サーバ側の問題で発生する一般エラー"
+      content:
+        application/json:
+          schema:
+            $ref: "#components/schemas/errors"
+
+      
